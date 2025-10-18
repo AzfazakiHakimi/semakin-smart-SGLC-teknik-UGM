@@ -1,0 +1,168 @@
+/* PUNYA ORSTED!!! */
+//-----------------------------------------------------------------------------------------------------------------------------------------//
+#include  <Servo.h>   // Masukin library Servo
+
+Servo penekan_naik; // Servo pertama bernama "penekan_naik"
+Servo penekan_turun; // Servo kedua bernama "penekan_turun"
+
+int speaker = 2; // Speaker ada di pin 2 Arduino
+
+int trigger_naik  = 11; // Trigger sensor naik ada di pin 10 Arduino
+int echo_naik     = 10; // Echo sensor naik ada di pin 11 Arduino
+int trigger_turun = 9; // Trigger sensor turun ada di pin 9 Arduino
+int echo_turun    = 8; // Echo sensor naik ada di pin 8 Arduino
+
+float jarak_naik ; // Ada jarak yang dibaca antara sensor naik dengan sesuatu di depannya
+float jarak_turun; // Ada jarak yang dibaca antara sensor turun dengan sesuatu di depannya
+float durasi_naik; // Ada durasi yang dibaca antara gelombang keluar hingga gelombang diterima oleh sensor naik
+float durasi_turun; // Ada durasi yang dibaca antara gelombang keluar hingga gelombang diterima oleh sensor turun
+
+void setup(){
+  // put your setup code here, to run once:
+  Serial.begin(9600); // Memulai Serial Monitor di baud 9600
+  pinMode(trigger_naik,  OUTPUT); // Trigger sensor naik butuh listrik untuk mengeluarkan gelombang
+  pinMode(trigger_turun, OUTPUT); // Trigger sensor turun butuh listrik untuk mengeluarkan gelombang
+  pinMode(echo_naik,     INPUT) ; // Echo sensor naik akan memberi sinyal tentang durasi penerimaan gelombang
+  pinMode(echo_turun,    INPUT) ; // Echo sensor naik akan memberi sinyal tentang durasi penerimaan gelombang
+  pinMode(speaker,       OUTPUT); // Speaker butuh listrik untuk mengeluarkan bunyi
+
+  penekan_naik.attach(6) ; // Servo "penekan_naik" ada di pin 6 Arduino
+  penekan_turun.attach(7); // Servo "penekan_turun" ada di pin 7 Arduino
+}
+
+void loop(){
+  // put your main code here, to run repeatedly:
+  noTone(speaker); // Speaker dimatikan dulu agar netral
+
+  penekan_naik.write(0); // Servo "penekan_naik" diposisikan pada posisi netral (0 derajat)
+  penekan_turun.write(0); // Servo "penekan_turun" diposisikan pada posisi netral (0 derajat)
+
+  digitalWrite(trigger_naik, LOW); // Trigger sensor naik dimatikan dulu agar netral
+  digitalWrite(trigger_turun, LOW); // Trigger sensor turun dimatikan dulu agar netral
+  delayMicroseconds(2); // Jeda 2 mikro detik
+  digitalWrite(trigger_naik, HIGH); // Trigger sensor naik diberi listrik untuk mengeluarkan gelombang
+  digitalWrite(trigger_turun, HIGH); // Trigger sensor turun diberi listrik untuk mengeluarkan gelombang
+  delayMicroseconds(10); // Jeda 10 mikro detik
+
+  digitalWrite(trigger_naik, LOW); // Trigger sensor naik dinetralkan kembali
+  durasi_naik = pulseIn(echo_naik, HIGH); // Menyalakan Echo untuk sensor naik membaca durasi gelombang dikeluarkan, memantul, hingga diterima Echo 
+  
+  digitalWrite(trigger_turun, LOW); // Trigger sensor turun dinetralkan kembali
+  durasi_turun = pulseIn(echo_turun, HIGH); // Menyalakan Echo untuk sensor turun membaca durasi gelombang dikeluarkan, memantul, hingga diterima Echo
+
+  jarak_naik = (0.034 * durasi_naik)/2; // Jarak = (Cepat Rambat Gelombang)*(Waktu Tempuh)/2
+  jarak_turun = (0.034 * durasi_turun)/2; // Jarak = (Cepat Rambat Gelombang)*(Waktu Tempuh)/2
+  
+  Serial.print("Jarak Sensor Naik: "); // Menulis "Jarak Sensor Naik:"
+  Serial.print(jarak_naik); // Serial monitor memberi tahu jarak yang dibaca sensor naik
+  Serial.print(" cm"); // Menulis "cm"
+  Serial.println(); // New line
+  Serial.print("Jarak Sensor Turun: "); // Menulis "Jarak Sensor Naik:"
+  Serial.print(jarak_turun); // Serial monitor memberi tahu jarak yang dibaca sensor turun
+  Serial.print(" cm"); // Menulis "cm"
+  Serial.println(); // New line
+  Serial.print("-------------------------"); // Memberi sekat
+  Serial.println(); // New line
+  
+  delay(1000); // Jeda 1 detik
+
+  if(jarak_naik < 10 && jarak_naik >= 0 && jarak_turun >= 10){ // Ketika sensor naik mendetekesi benda (tangan) berada pada jarak kurang dari 10 cm di depannya
+    tone(speaker, 264); // Do
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 264); // Do
+    delay(400); // Jeda 0,4 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 330); // Mi
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 330); // Mi
+    delay(400); // Jeda 0,4 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 297); // Re
+    delay(150); // Jeda 0,15 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 297); // Re
+    delay(150); // Jeda 0,15 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 297); // Re
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 396); // Sol
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 330); // Mi
+    delay(1000); // Jeda 1 detik
+    noTone(speaker); // Speaker dimatikan
+
+    penekan_naik.write(45); // Servo "penekan_naik" berputar dari 0 derajat ke 45 derajat
+    delay(1000); // Jeda 1 detik
+    penekan_naik.write(0); // Servo "penekan_naik" berputar dari 45 derajat ke 0 derajat
+    delay(1000); // Jeda 1 detik
+  }
+
+  if(jarak_turun < 10 && jarak_naik >= 0 && jarak_naik >= 10){ // Ketika sensor turun mendetekesi benda (tangan) berada pada jarak kurang dari 10 cm di depannya
+    tone(speaker, 264); // Do
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 264); // Do
+    delay(400); // Jeda 0,4 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 330); // Mi
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 330); // Mi
+    delay(400); // Jeda 0,4 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 297); // Re
+    delay(150); // Jeda 0,15 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 297); // Re
+    delay(150); // Jeda 0,15 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 297); // Re
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 264); // Do
+    delay(350); // Jeda 0,35 detik
+    noTone(speaker); // Speaker dimatikan
+    delay(150); // Jeda 0,15 detik
+    tone(speaker, 264); // Do
+    delay(1000); // Jeda 1 detik
+    noTone(speaker); // Speaker dimatikan
+    
+    penekan_turun.write(45); // Servo "penekan_turun" berputar dari 0 derajat ke 45 derajat
+    delay(1000); // Jeda 1 detik
+    penekan_naik.write(0); // Servo "penekan_turun" berputar dari 45 derajat ke 0 derajat
+    delay(1000); // Jeda 1 detik
+  }
+
+  if(jarak_naik < 10 && jarak_naik >= 0 && jarak_turun < 10 && jarak_turun >=0){ // Antisipasi kedua sensor bekerja bersamaan
+    penekan_naik.write(0); // Servo "penekan_naik" diposisikan pada posisi netral (0 derajat)
+    penekan_turun.write(0); // Servo "penekan_turun" diposisikan pada posisi netral (0 derajat)
+
+    noTone(speaker); // Speaker dimatikan
+  }
+
+  if(jarak_naik < 0 || jarak_turun < 0){ // Antisipasi error pada jarak negatif
+    penekan_naik.write(0); // Servo "penekan_naik" diposisikan pada posisi netral (0 derajat)
+    penekan_turun.write(0); // Servo "penekan_turun" diposisikan pada posisi netral (0 derajat)
+
+    noTone(speaker); // Speaker dimatikan
+  }
+}
